@@ -8,7 +8,7 @@ To better understand the snmp protocol, I will install a virtual machine on my c
 How do I enable SNMP on Ubuntu?
 run the following commands in the terminal on the agent computer:
 
-1.Update all packages: sudo apt-get update
+1.Update all packages: **sudo apt-get update**
 
 2.Install SNMP: sudo apt-get install snmpd
 
