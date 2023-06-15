@@ -10,7 +10,9 @@ How do I enable SNMP on Ubuntu?
 run the following commands in the terminal on the agent computer:
 
 1.Update all packages: sudo apt-get update
+
 2.Install SNMP: sudo apt-get install snmpd
+
 3.Edit the snmpd.conf file with any text editor. Type: sudo nano /etc/snmp/snmpd.conf
 4.Configure agentAddress: agentAddress udp:161
 5.Configure rocommunity name like: rocommunity public
