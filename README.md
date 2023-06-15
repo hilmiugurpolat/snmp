@@ -23,3 +23,5 @@ run the following commands in the terminal on the agent computer:
 6.Restart the SNMPD service: **sudo service snmpd restart**
 
 7.Check that SNMPD is started OK with this: **sudo service snmpd status**
+
+to be continued
