@@ -38,13 +38,34 @@ You can follow the steps below to enable MIBs in Linux operating system:
 4. You can use the following command to check active MIB files: **`snmpwalk -v2c -c public localhost`**
    
 ![Screenshot from 2023-06-20 12-44-06](https://github.com/hilmiugurpolat/snmp/assets/110428681/946e5b8d-7bcf-46e0-aab3-838c0cb74ebf)
-If this output is output, then the operation is correct.
+ If this output is output, then the operation is correct.
 
 
 # CUSTOM MIB
 Creating a customized MIB file is used to define management information for a specific need outside of standard MIB files.
 
 For example, we can create a custom MIB file for the NTP service. This file may contain administrative information of NTP servers, statistics about time synchronization, and configurations. In this way, we can access and manage NTP service related information using this custom MIB file over SNMP protocol.
+
+You can follow the steps below to download ntp service and create custom mib file
+
+1.Downloading NTP:
+
+-You can use this command to download NTP: **`sudo apt-get install ntp`**
+
+2.Creating the custom MIB file:
+
+-To create the custom MIB file, first go to **`/usr/share/snmp/mibs`**
+
+-**`cd /usr/share/snmp/mibs`*
+
+3.Then you can use a text editor to create the custom MIB file. For example, create a new file with the Nano text editor using the following command:
+-**`sudo nano ntp.txt`**
+
+to be continued .. 
+
+
+
+
 
 
 
