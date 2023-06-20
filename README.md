@@ -1,7 +1,7 @@
 # SNMP
 Simple Network Management Protocol(SNMP)
 
-SNMP is an application layer protocol for the exchange of administrative information across network devices.
+SNMP (Simple Network Management Protocol) is a network management protocol that provides communication between network devices and network management systems. SNMP is used to monitor the status of network devices, detect errors, evaluate performance, and perform management operations.
 
 To better understand the snmp protocol, I will install a virtual machine on my computer (ubuntu server). From now on i will call my virtual machine as agent computer and my local as admin computer
 
