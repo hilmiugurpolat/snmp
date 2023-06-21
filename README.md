@@ -58,8 +58,13 @@ You can follow the steps below to download ntp service and create custom mib fil
 
 -**`cd /usr/share/snmp/mibs`*
 
-3.Then you can use a text editor to create the custom MIB file. For example, create a new file with the Nano text editor using the following command:
+-Then you can use a text editor to create the custom MIB file. For example, create a new file with the Nano text editor using the following command:
 -**`sudo nano ntp.txt`**
+
+3.Generating the Contents of the Custom MIB File:
+Let's open the "ntp.txt" file we created and edit its content as follows:
+
+
 
 to be continued .. 
 
