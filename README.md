@@ -431,6 +431,40 @@ WantedBy=multi-user.target
 
 As can be seen in the output, the status of the ntp service is updated automatically.
 
-# SNMPWALK && SNMPSET
+# SNMPSET
+
+snmpset is a tool for modifying the manageable properties of a network device using the SNMP (Simple Network Management Protocol) protocol.
+
+```snmpwalk -v2c -c public 10.1.240.61 .1.3.6.1.4.1.1023.1.2 ```
+
+When we run the a command, the output is as follows:
+
+```
+hilmi@onur:~$ snmpwalk -v2c -c public 10.1.240.61 .1.3.6.1.4.1.1023.1.2
+SNMPv2-SMI::enterprises.1023.1.2.1.1.0 = STRING: "ntp status: active"
+SNMPv2-SMI::enterprises.1023.1.2.1.2.1.2.1 = STRING: "since Fri 2023-04-07  exit 0"
+SNMPv2-SMI::enterprises.1023.1.2.1.2.1.3.1 = INTEGER: 1
+SNMPv2-SMI::enterprises.1023.1.2.1.3.0 = STRING: "ankara, istanbul"
+SNMPv2-SMI::enterprises.1023.1.2.1.4.0 = STRING: "aslan, kaplan"
+```
+
+if we want to change oid content of 1023.1.2.1.4.0, We should write a command like the following:
+
+```snmpset -v2c -c public 10.1.240.61 .1.3.6.1.4.1.1023.1.2.1.4.0 s "{artvin,rize}"```
+
+then when we run the ```snmpwalk -v2c -c public 10.1.240.61 .1.3.6.1.4.1.1023.1.2 ``` command again, the output changes as follows:
+
+```
+SNMPv2-SMI::enterprises.1023.1.2.1.1.0 = STRING: "ntp status: active"
+SNMPv2-SMI::enterprises.1023.1.2.1.2.1.2.1 = STRING: "since Fri 2023-04-07  exit 0"
+SNMPv2-SMI::enterprises.1023.1.2.1.2.1.3.1 = INTEGER: 1
+SNMPv2-SMI::enterprises.1023.1.2.1.3.0 = STRING: "ankara, istanbul"
+SNMPv2-SMI::enterprises.1023.1.2.1.4.0 = STRING: "artvin, rize"
+```
+
+![IMG_20230622_170931](https://github.com/hilmiugurpolat/snmp/assets/110428681/d38d28ff-5fc7-4079-b4d5-21c2a72cb2b5)
+
+# MYSQL
+
 
 
