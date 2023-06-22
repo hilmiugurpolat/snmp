@@ -8,22 +8,22 @@ To better understand the snmp protocol, I will install a virtual machine on my c
 How do I enable SNMP on Ubuntu?
 run the following commands in the terminal on the agent computer:
 
-1.Update all packages:  **`sudo apt-get update`**
+1.Update all packages:  `sudo apt-get update`
 
-2.Install SNMP:   **`sudo apt-get install snmpd`**
+2.Install SNMP:   `sudo apt-get install snmpd`
 
-3.Edit the snmpd.conf file with any text editor.  Type:  **`sudo nano /etc/snmp/snmpd.conf`**
+3.Edit the snmpd.conf file with any text editor.  Type:  `sudo nano /etc/snmp/snmpd.conf`
 
-4.Configure agentAddress: **`agentAddress udp:161`**
+4.Configure agentAddress: `agentAddress udp:161`
 
-5.Configure rocommunity name like: **`rocommunity public`**
+5.Configure rocommunity name like: `rocommunity public`
 
 -Change “public” to your community name
 
-6.Restart the SNMPD service: **`sudo service snmpd restart`**
+6.Restart the SNMPD service: `sudo service snmpd restart`
 
 
-7.Check that SNMPD is started OK with this: **`sudo service snmpd status`**
+7.Check that SNMPD is started OK with this: `sudo service snmpd status`
 ![IMG_20230620_090201](https://github.com/hilmiugurpolat/snmp/assets/110428681/5e11c967-0f90-4c97-88de-efd0eea558b0)
 if the output is like this, snmp service is running correctly
 
@@ -32,10 +32,10 @@ if the output is like this, snmp service is running correctly
 MIB is a structure used in network management protocols. A MIB is a collection of data items that describe the state, configuration, and other properties of managed devices. When communicating with SNMP (Simple Network Management Protocol), admin clients use MIB files to get management information from SNMP agents (managed devices).
 
 You can follow the steps below to enable MIBs in Linux operating system:
-1. Downloading MIB files: **`sudo apt-get install snmp-mibs-downloader`**
-2. Defining MIB files: **`sudo nano /etc/snmp/snmp.conf`**
-3. Add this line inside the file: **`mibs +ALL`** and **`view all included .1 80 mibs +ALL`**
-4. You can use the following command to check active MIB files: **`snmpwalk -v2c -c public localhost`**
+1. Downloading MIB files: `sudo apt-get install snmp-mibs-downloader`
+2. Defining MIB files: `sudo nano /etc/snmp/snmp.conf`
+3. Add this line inside the file: `mibs +ALL` and `view all included .1 80 mibs +ALL`
+4. You can use the following command to check active MIB files: `snmpwalk -v2c -c public localhost`
    
 ![Screenshot from 2023-06-20 12-44-06](https://github.com/hilmiugurpolat/snmp/assets/110428681/946e5b8d-7bcf-46e0-aab3-838c0cb74ebf)
  If this output is output, then the operation is correct.
@@ -50,16 +50,16 @@ You can follow the steps below to download ntp service and create custom mib fil
 
 1.Downloading NTP:
 
--You can use this command to download NTP: **`sudo apt-get install ntp`**
+-You can use this command to download NTP: sudo apt-get install ntp`
 
 2.Creating the custom MIB file:
 
--To create the custom MIB file, first go to **`/usr/share/snmp/mibs`**
+-To create the custom MIB file, first go to `/usr/share/snmp/mibs`
 
--**`cd /usr/share/snmp/mibs`**
+-`cd /usr/share/snmp/mibs`
 
 -Then you can use a text editor to create the custom MIB file. For example, create a new file with the Nano text editor using the following command:
--**`sudo nano ntp.txt`**
+-`sudo nano ntp.txt`
 
 3.Generating the Contents of the Custom MIB File:
 Let's open the "ntp.txt" file we created and edit its content as follows:
@@ -192,12 +192,20 @@ STATUS      current
 
 END
 ```
+Now let's add this mib file to `/etc/snmp/snmpd.conf` as`mibs +NTPv4-MIB`
 
 
+In order to validate the MIB structure, we can use smilint. 
+validate
+Run `smilint /usr/share/snmp/mibs/ntp.txt`
 
+![IMG_20230622_103827](https://github.com/hilmiugurpolat/snmp/assets/110428681/f9f5f3a4-62a7-415e-9a91-9a79a83c6f98)
 
+if you don't get any output then mib file is in correct format
 
+The snmptranslate command helps us find OIDs for certain features in NTPv4-MIB.
 
+![IMG_20230622_104920](https://github.com/hilmiugurpolat/snmp/assets/110428681/e9c0f8a2-2140-4313-a8ff-344c827c54fb)
 
 
 to be continued .. 
