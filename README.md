@@ -214,9 +214,130 @@ In order to add new functionality to an SNMP agent the agent must be extended.
 https://vincent.bernat.ch/en/blog/2012-extending-netsnmp
 
 
+Let us create our first script. Create /etc/snmp/exampleScript.sh and add the following content to it:
 
+```#!/bin/bash
+PLACE=".1.3.6.1.4.1.1023.1.2.1"
+REQ="$2"    # Requested OID
+VALUE_STORAGE="/tmp/snmp_value_storage.txt"
+
+# Check if the value storage file exists, if not, create it
+if [ ! -f "$VALUE_STORAGE" ]; then
+    touch $VALUE_STORAGE
+fi
+
+# Function to get value from the value storage
+get_value_from_storage() {
+    OID=$1
+    grep "^$OID" $VALUE_STORAGE | cut -d' ' -f2
+}
+
+# Function to set value to the value storage
+set_value_to_storage() {
+    OID=$1
+    VALUE=$2
+    if grep -q "^$OID" $VALUE_STORAGE; then
+        sed -i "s/^$OID.*/$OID $VALUE/" $VALUE_STORAGE
+    else
+        echo "$OID $VALUE" >> $VALUE_STORAGE
+    fi
+}
+
+# Process SET requests by saving the assigned value to the value storage
+if [ "$1" = "-s" ]; then
+    set_value_to_storage $REQ $4
+    exit 0
+fi
+
+# GETNEXT requests - determine next valid instance
+if [ "$1" = "-n" ]; then
+    case "$REQ" in
+        $PLACE|             \
+        $PLACE.0|           \
+        $PLACE.0.*|         \
+        $PLACE.1)       RET=$PLACE.1.0 ;;     # netSnmpPassString.0
+        
+        $PLACE.1.*|         \
+        $PLACE.2|           \
+        $PLACE.2.0|         \
+        $PLACE.2.0.*|       \
+        $PLACE.2.1|         \
+        $PLACE.2.1.0|       \
+        $PLACE.2.1.0.*|     \
+        $PLACE.2.1.1|       \
+        $PLACE.2.1.1.*|     \
+        $PLACE.2.1.2|       \
+        $PLACE.2.1.2.0) RET=$PLACE.2.1.2.1 ;; # netSnmpPassInteger.1
+
+        $PLACE.2.1.2.*|     \
+        $PLACE.2.1.3|       \
+        $PLACE.2.1.3.0) RET=$PLACE.2.1.3.1 ;; # netSnmpPassOID.1
+
+        $PLACE.2.*|         \
+        $PLACE.3)       RET=$PLACE.3.0 ;;     # netSnmpPassTimeTicks.0
+        $PLACE.3.*|         \
+        $PLACE.4)       RET=$PLACE.4.0 ;;     # netSnmpPassIpAddress.0
+        $PLACE.4.*|         \
+        $PLACE.5)       RET=$PLACE.5.0 ;;     # netSnmpPassCounter.0
+        $PLACE.5.*|         \
+        $PLACE.6)       RET=$PLACE.6.0 ;;     # netSnmpPassGauge.0
+
+        *)              exit 0 ;;
+    esac
+else
+    # GET requests - check for valid instance
+    case "$REQ" in
+        $PLACE.1.0|         \
+        $PLACE.2.1.2.1|     \
+        $PLACE.2.1.3.1|     \
+        $PLACE.3.0|         \
+        $PLACE.4.0|         \
+        $PLACE.5.0|         \
+        $PLACE.6.0)     RET=$REQ ;;
+        *)              exit 0 ;;
+    esac
+fi
+
+# Process SET requests by saving the assigned value to the value storage
+if [ "$1" = "-s" ]; then
+    case "$REQ" in
+        $PLACE.3.0) set_value_to_storage $REQ $4; exit 0 ;;
+        $PLACE.4.0) set_value_to_storage $REQ $4; exit 0 ;;
+        *)          exit 0 ;;
+    esac
+fi
+
+# "Process" GET* requests - return hard-coded value
+echo "$RET"
+case "$RET" in
+    $PLACE.1.0)      echo "string";  echo "ntp status: active";               exit 0 ;;
+    $PLACE.2.1.2.1)  echo "string";  echo "since Fri ess2023-04-07";          exit 0 ;;
+    $PLACE.2.1.3.1)  echo "integer"; echo "1";                                exit 0 ;;
+    $PLACE.3.0)      echo "string";  echo "$(get_value_from_storage $RET '')"; exit 0 ;;
+    $PLACE.4.0)      echo "string";  echo "$(get_value_from_storage $RET '')"; exit 0 ;;
+    $PLACE.5.0)      echo "counter"; echo "42";                               exit 0 ;;
+    $PLACE.6.0)      echo "gauge";   echo "42";                               exit 0 ;;
+    *)               echo "string";  echo "ack... $RET $REQ";                 exit 0 ;;  # Should not happen
+esac
+```
+
+1. **get_value_from_storage():** A function used to retrieve a value from the value storage file.
+2. **set_value_to_storage():** A function used to save a value to the value storage file.
+3. **SET requests:** The script uses the set_value_to_storage() function to store an assigned value in the value storage file.
+4. **GETNEXT requests:** It determines the next valid instance.
+5. **GET requests:** It checks for a valid instance.
+6. **Other GET requests:** It returns hardcoded values.
+
+add the following line to snmpd.conf
+
+```pass .1.3.6.1.4.1.1023.1.2.1 /bin/bash /etc/snmp/exampleScript.sh```
+
+and then run the following code:```snmpwalk -v2c -c public localhost .1.3.6.1.4.1.1023.1.2```
+
+![IMG_20230622_153447](https://github.com/hilmiugurpolat/snmp/assets/110428681/c26add54-e3f4-42ac-ae1b-3e4e362f3dcd)
 
 to be continued .. 
+
 
 
 
