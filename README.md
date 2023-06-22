@@ -431,3 +431,6 @@ WantedBy=multi-user.target
 
 As can be seen in the output, the status of the ntp service is updated automatically.
 
+# SNMPWALK && SNMPSET
+
+
