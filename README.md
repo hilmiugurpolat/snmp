@@ -207,6 +207,14 @@ The snmptranslate command helps us find OIDs for certain features in NTPv4-MIB.
 
 ![IMG_20230622_104920](https://github.com/hilmiugurpolat/snmp/assets/110428681/e9c0f8a2-2140-4313-a8ff-344c827c54fb)
 
+# EXTENDING THE SNMP AGENT
+
+In order to add new functionality to an SNMP agent the agent must be extended. 
+
+https://vincent.bernat.ch/en/blog/2012-extending-netsnmp
+
+
+
 
 to be continued .. 
 
