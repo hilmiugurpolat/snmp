@@ -336,12 +336,98 @@ and then run the following code:```snmpwalk -v2c -c public localhost .1.3.6.1.4.
 
 ![IMG_20230622_153447](https://github.com/hilmiugurpolat/snmp/assets/110428681/c26add54-e3f4-42ac-ae1b-3e4e362f3dcd)
 
-to be continued .. 
+output should be like this
+
+# NTP STATUS
+
+Now we have written the ntp status as active by default in the script file above. Now let's write a c code and this c code will update $PLACE.1.0 as active or incative according to the ntp status.
 
 
+```
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+int main()
+{
+    // Check NTP status
+    FILE *pipe = popen("sudo systemctl status ntp", "r");
+    FILE *output_file = fopen("ntp_status.txt", "w");
+    if (pipe == NULL || output_file == NULL) {
+        perror("Error opening pipe or file");
+        return 1;
+ }
+
+    int found = 0;
+    char search[] = "active (running)";
+    char buffer[1024];
+    char result[1024];
+
+ while(fgets(buffer,sizeof(buffer),pipe) !=NULL){
+              if(strstr(buffer,search)!=NULL){
+              found=1;
+           strcpy(result, strchr(buffer, ':') + 5); // copy the part of the line after ':'
+                  fputs("1( active)",output_file);
+       printf("1(active)");
+                 found=1;
+                 break;}}
+   if(!found)    {
+  fputs("0(inactive)",output_file);
+                 printf("0(inactive)"); }
+    pclose(pipe);
+    fclose(output_file);
+ // Update the script file
+    FILE *sh_file = fopen("/etc/snmp/exampleScript.sh", "r+");
+
+  if (sh_file == NULL) {
+        perror("Error opening script file");
+        return 1;
+    }
+ char buffer2[1024];
+
+  while (fgets(buffer2, sizeof(buffer2), sh_file)) {
+        if (strstr(buffer2, " $PLACE.1.0)")) {
+            if (found == 1) {
+                fseek(sh_file, -strlen(buffer2), SEEK_CUR);
+                fprintf(sh_file, " $PLACE.1.0)      echo \"string\";  echo \"ntp status: active\";               exit 0 ;;\n"$
+                fprintf(sh_file, " $PLACE.2.1.2.1 ) echo \"string\";  echo \"since Fri 2023-04-07 \"             exit 0 ;;\n"$
+                fprintf(sh_file, " $PLACE.2.1.3.1)  echo \"integer\"; echo \"1\";                                exit 0 ;;\n"$
+            } else {
+                fseek(sh_file, -strlen(buffer2), SEEK_CUR);
+                fprintf(sh_file, " $PLACE.1.0)      echo \"string\";  echo \"ntp status: inactive\";             exit 0 ;;\n"$
+                fprintf(sh_file, " $PLACE.2.1.2.1 ) echo \"string\";  echo \"since Fri 2023-04-07 \"             exit 0 ;;\n"$
+                fprintf(sh_file, " $PLACE.2.1.3.1)  echo \"integer\"; echo \"0\";                                exit 0 ;;\n"$
+            }
+            break;
+        }
+    }
+
+    fclose(sh_file);
+    return 0;
+}
+
+```
+This program runs a shell command to check the NTP status, processes the output, and then updates a script file. The script will return fixed text such as "ntp status: active" or "ntp status: inactive" depending on the specific SNMP OIDs.
+
+Instead of running this c code every time from the terminal, let's write an example service to run it continuously.
+
+```[Unit]
+Description=Example Service
+
+[Service]
+ExecStart=/bin/bash -c "gcc -o /home/polat/hello /home/polat/hello.c && /home/polat/hello"
+Restart=always
+StartLimitInterval=1min
+StartLimitBurst=0
 
 
+[Install]
+WantedBy=multi-user.target
 
 
+```
 
+![Screenshot from 2023-06-22 16-17-04](https://github.com/hilmiugurpolat/snmp/assets/110428681/c0ccc375-e241-48ea-bbcb-a6a9375ebee8)
+
+As can be seen in the output, the status of the ntp service is updated automatically.
 
