@@ -517,4 +517,119 @@ cnx.close()
 
 ![Screenshot from 2023-06-23 10-09-21](https://github.com/hilmiugurpolat/snmp/assets/110428681/133c722c-6e34-4f2a-93c7-0e779dc25a62)
 
+# Saving data directly to database:
+
+Above, we added the data to the database with the help of txt. Now here we will try to save the data sent directly to the database with snmpset. For this, we will update the bash script instead of the script we wrote with python.
+
+```
+#!/bin/bash
+PLACE=".1.3.6.1.4.1.1023.1.2.1"
+REQ="$2"    # Requested OID
+DB_USER="root"
+DB_PASSWORD="19118v#0072.A"
+DB_HOST="localhost"
+DB_DATABASE="deneme"
+
+# Function to get value from the database
+
+get_value_from_database() {
+    OID=$1
+    mysql -u$DB_USER -p$DB_PASSWORD -h$DB_HOST $DB_DATABASE -N -e \
+    "SELECT CONCAT(ad, ', ', soyad) FROM kisiler WHERE oid = '$OID';" 2>/dev/null
+}
+
+# Function to set value to the value storage
+set_value_to_storage() {
+    OID=$1
+    VALUE=$2
+    ad_soyad=$(echo "$VALUE" | tr -d '{}') # remove curly braces
+    ad=$(echo "$ad_soyad" | cut -d',' -f1) # split by comma
+    soyad=$(echo "$ad_soyad" | cut -d',' -f2) # split by comma
+    ad=${ad// /}  # remove extra whitespace
+    soyad=${soyad// /}  # remove extra whitespace
+
+    mysql -u$DB_USER -p$DB_PASSWORD -h$DB_HOST -D$DB_DATABASE -e \
+    "INSERT INTO kisiler (oid, ad, soyad) VALUES ('$OID', '$ad', '$soyad');"
+}
+
+
+# Process SET requests by saving the assigned value to the value storage
+if [ "$1" = "-s" ]; then
+    set_value_to_storage $REQ $4
+    exit 0
+fi#
+#  GETNEXT requests - determine next valid instance
+#
+if [ "$1" = "-n" ]; then
+  case "$REQ" in
+    $PLACE|             \
+    $PLACE.0|           \
+    $PLACE.0.*|         \
+    $PLACE.1)       RET=$PLACE.1.0 ;;     # netSnmpPassString.0
+    $PLACE.1.*|         \
+    $PLACE.2|           \
+    $PLACE.2.0|         \
+    $PLACE.2.0.*|       \
+    $PLACE.2.1|         \
+    $PLACE.2.1.0|       \
+    $PLACE.2.1.0.*|     \
+    $PLACE.2.1.1|       \
+    $PLACE.2.1.1.*|     \
+    $PLACE.2.1.2|       \
+    $PLACE.2.1.2.0) RET=$PLACE.2.1.2.1 ;; # netSnmpPassInteger.1
+    $PLACE.2.1.2.*|     \
+    $PLACE.2.1.3|       \
+    $PLACE.2.1.3.0) RET=$PLACE.2.1.3.1 ;; # netSnmpPassOID.1
+
+    $PLACE.2.*|         \
+    $PLACE.3)       RET=$PLACE.3.0 ;;     # netSnmpPassTimeTicks.0
+    $PLACE.3.*|         \
+    $PLACE.4)       RET=$PLACE.4.0 ;;     # netSnmpPassIpAddress.0
+    $PLACE.4.*|         \
+    $PLACE.5)       RET=$PLACE.5.0 ;;     # netSnmpPassCounter.0
+     $PLACE.5.*|         \
+    $PLACE.6)       RET=$PLACE.6.0 ;;     # netSnmpPassGauge.0
+
+    *)              exit 0 ;;
+  esac
+                                else
+#
+#  GET requests - check for valid instance
+#
+  case "$REQ" in
+    $PLACE.1.0|         \
+    $PLACE.2.1.2.1|     \
+    $PLACE.2.1.3.1|     \
+    $PLACE.3.0|         \
+    $PLACE.4.0|         \
+    $PLACE.5.0|         \
+    $PLACE.6.0)     RET=$REQ ;;
+    *)              exit 0 ;;
+  esac
+fi
+# Process SET requests by saving the assigned value to the value storage
+if [ "$1" = "-s" ]; then
+    case "$REQ" in
+        $PLACE.3.0) set_value_to_storage $REQ $4; exit 0 ;;
+        $PLACE.4.0) set_value_to_storage $REQ $4; exit 0 ;;
+        *)          exit 0 ;;
+    esac
+
+#
+# "Process" GET* requests - return hard-coded value
+#
+
+
+ echo "$RET"
+ case "$RET" in
+ $PLACE.1.0)      echo "string";  echo "ntp status: inactive";             exit 0 ;;
+ $PLACE.2.1.2.1 ) echo "string";  echo "since Fri 2023-04-07 "             exit 0 ;;
+ $PLACE.2.1.3.1)  echo "integer"; echo "0";                                exit 0 ;;
+ $PLACE.3.0)      echo "string";  echo "$(get_value_from_database $RET '')";                exit 0 ;;
+ $PLACE.4.0)      echo "string";  echo "$(get_value_from_database $RET '')";                exit 0 ;;
+
+*)
+esac
+
+```
 
