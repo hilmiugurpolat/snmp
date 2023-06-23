@@ -466,6 +466,55 @@ SNMPv2-SMI::enterprises.1023.1.2.1.4.0 = STRING: "artvin, rize"
 
 # MYSQL
 
+Now let's save the information sent with snmp into the database. Python code can be written for this
+```import mysql.connector
+import sys
+#veritabanı bilgilerini burada alıom
 
+configure= {
+            'user': 'root',
+            'password': '19118v#0072.A',
+            'host': 'localhost',
+            'database': ' deneme',
+}
+
+#veritabanı bağlantısını burada yapıyorum
+cnx=mysql.connector.connect(**configure)
+#işlemlere devamke
+cursor=cnx.cursor()
+#var olan kayıtlar için fonksiyon
+existing_records=set()
+cursor.execute("select ad  From kisiler")
+for kayit in cursor:
+ existing_records.add(kayit[0])
+#yeni kayıtlar için fonksiyon
+with open('/tmp/snmp_value_storage.txt', 'r') as f:
+    for line in f:
+        split_line = line.strip().split(',', 1)
+        oid = split_line[0].strip()
+        ad_soyad = split_line[1].replace("{", "").replace("}", "")  # remove curly braces
+       # ad_soyad = split_line[1].strip("{}")  # remove curly braces
+        ad, soyad = ad_soyad.split(',')  # split by comma
+        ad = ad.strip()  # remove extra whitespace
+        soyad = soyad.strip()  # remove extra whitespace
+        if ad not in existing_records:
+         sql = "INSERT INTO kisiler (oid, ad, soyad) VALUES (%s, %s, %s)"
+         val = (oid, ad, soyad)
+         cursor.execute(sql, val)
+         existing_records.add(ad)
+
+
+
+#yapılan değişiklikleri kayıet eden fonksiyon
+cnx.commit()
+
+#bağlantıyı kapatma
+cursor.close()
+cnx.close()
+``` 
+![Screenshot from 2023-06-23 10-09-06](https://github.com/hilmiugurpolat/snmp/assets/110428681/2b06da78-8bda-4895-9a1f-00f372a66a18)
+
+
+![Screenshot from 2023-06-23 10-09-21](https://github.com/hilmiugurpolat/snmp/assets/110428681/133c722c-6e34-4f2a-93c7-0e779dc25a62)
 
 
